@@ -13,26 +13,25 @@ function App() {
 
   useEffect(() => {
     //Will only run onche when the app component loads...
-    
-    auth.onAuthStateChanged(authUser => {
-      console.log('THE USER IS ---- ', authUser);
 
-      
-      if(authUser) {
-        //The user just logged in / the user was logged in  
+    auth.onAuthStateChanged((authUser) => {
+      console.log("THE USER IS ---- ", authUser);
+
+      if (authUser) {
+        //The user just logged in / the user was logged in
         dispatch({
-          type: 'SET_USER',
-          user: authUser
-        })
+          type: "SET_USER",
+          user: authUser,
+        });
       } else {
         //The user is logged out
         dispatch({
-          type: 'SET_USER',
-          user: null
-        })
+          type: "SET_USER",
+          user: null,
+        });
       }
-    })
-  }, [])
+    });
+  }, []);
 
   return (
     // BEM convention

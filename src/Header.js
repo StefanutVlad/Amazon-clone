@@ -7,13 +7,13 @@ import { useStateValue } from "./StateProvider";
 import { auth } from "./firebase";
 
 function Header() {
-  const [{ basket , user }, dispatch] = useStateValue();
+  const [{ basket, user }, dispatch] = useStateValue();
 
   const handleAuthention = () => {
-    if(user) {
+    if (user) {
       auth.signOut();
     }
-  }
+  };
 
   return (
     <div className="header">
@@ -33,9 +33,10 @@ function Header() {
         {/*//only redirect to login if there is no user  */}
         <Link to={!user && "/login"}>
           <div onClick={handleAuthention} className="header__option">
-            <span className="header__optionLineOne">Hello Guest</span>
-            <span className="header__optionLineTwo">{user ?
-             'Sign Out' : 'Sign In'}</span>
+            <span className="header__optionLineOne">Hello {!user ? 'Guest': user?.email}</span>
+            <span className="header__optionLineTwo">
+              {user ? "Sign Out" : "Sign In"}
+            </span>
           </div>
         </Link>
 

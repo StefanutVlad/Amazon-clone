@@ -4,12 +4,18 @@ import CheckoutProduct from "./CheckoutProduct";
 import { getBasketTotal } from "./reducer";
 import Subtotal from "./Subtotal";
 import { useStateValue } from "./StateProvider";
+import FlipMove from "react-flip-move";
 
 function Checkout() {
   const [{ basket, user }, dispatch] = useStateValue();
+  const extra = basket.length;
+  const ticketNotVisibleState = {
+    transform: "translateX(100%)",
+    opacity: 0.1,
+  };
 
   return (
-    <div className="checkout">
+    <div className={`checkout  ${extra && "extraa"}`}>
       <div className="checkout__left">
         <img
           className="checkout__ad"
@@ -19,21 +25,38 @@ function Checkout() {
 
         <div>
           <h3>Hello, {user?.email}</h3>
-          <h2 className="checkout__title">Your shopping basket</h2>
+          <h2 className="checkout__title">
+            {basket.length
+              ? "Your shopping Basket"
+              : "Your Shopping basket is Empty"}
+          </h2>
 
-          {basket.map((item) => (
-            <CheckoutProduct
-              id={item.id}
-              title={item.title}
-              image={item.image}
-              price={item.price}
-              rating={item.rating}
-            />
-          ))}
-          {/* CheckoutProduct*/}
-          {/* CheckoutProduct*/}
-          {/* CheckoutProduct*/}
-          {/* CheckoutProduct*/}
+          <FlipMove
+            duration={500}
+            staggerDurationBy="30"
+            easing="ease-out"
+            //accordianVertical
+            enterAnimationenterAnimation={{
+              from: ticketNotVisibleState,
+              to: {},
+            }}
+            leaveAnimation={{
+              from: {},
+              to: ticketNotVisibleState,
+            }}
+          >
+            {basket.map((item) => (
+              //weapperless mode for FlipMove (React 16+)
+
+              <CheckoutProduct
+                id={item.id}
+                title={item.title}
+                image={item.image}
+                price={item.price}
+                rating={item.rating}
+              />
+            ))}
+          </FlipMove>
         </div>
       </div>
       <div className="checkout__right">
