@@ -35,7 +35,6 @@ function Checkout() {
             duration={500}
             staggerDurationBy="30"
             easing="ease-out"
-            //accordianVertical
             enterAnimationenterAnimation={{
               from: ticketNotVisibleState,
               to: {},
