@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Checkout from "./Checkout";
 import Login from "./Login";
 import Payment from "./Payment";
+import Orders from "./Orders";
 import { auth } from "./firebase";
 import { useStateValue } from "./StateProvider";
 import { loadStripe } from "@stripe/stripe-js";
@@ -20,7 +21,7 @@ function App() {
   const [{}, dispatch] = useStateValue();
 
   useEffect(() => {
-    //Will only run onche when the app component loads...
+    //Will only run once when the app component loads...
 
     auth.onAuthStateChanged((authUser) => {
       console.log("THE USER IS ---- ", authUser);
@@ -46,6 +47,9 @@ function App() {
     <Router>
       <div className="app">
         <Switch>
+          <Route path="/orders">
+            <Orders />
+          </Route>
           <Route path="/login">
             <Login />
           </Route>

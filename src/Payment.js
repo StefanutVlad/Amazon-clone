@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CheckoutProduct from "./CheckoutProduct";
 import FlipMove from "react-flip-move";
 import "./Payment.css";
 import { useStateValue } from "./StateProvider";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import CurrencyFormat from "react-currency-format";
 import { getBasketTotal } from "./reducer";
+import axios from "./axios";
+import { db } from "./firebase";
 
 function Payment() {
   //hooks
@@ -15,17 +17,18 @@ function Payment() {
     transform: "translateX(100%)",
     opacity: 0.1,
   };
+  const history = useHistory();
 
   //payment hooks
   const stripe = useStripe();
   const elements = useElements();
 
   //states
+  const [succeded, setSucceeded] = useState(false);
+  const [processing, setProcessing] = useState("");
   const [error, setError] = useState(null);
   const [disabled, setDisabled] = useState(true);
-  const [processing, setProcessing] = useState("");
-  const [succeded, setSucceded] = useState(false);
-  const [clientSecret, setClientSecret] = userState(true);
+  const [clientSecret, setClientSecret] = useState(true);
 
   //Loads with the Payment component && when the dependencies change(the basket)
   useEffect(() => {
@@ -34,7 +37,7 @@ function Payment() {
       const response = await axios({
         method: "post",
         //Stripe expects the total in subunits (for $=> cents, so *100)
-        url: `/payment/create?total=${getBasketTotal(basket) * 100}`,
+        url: `/payments/create?total=${getBasketTotal(basket) * 100}`,
       });
       setClientSecret(response.data.clientSecret);
     };
@@ -42,6 +45,7 @@ function Payment() {
     getClientSecret();
   }, [basket]);
 
+  console.log("The secret is >>>", clientSecret);
   //Stripe code
   const handleSubmit = async (event) => {
     //Stop if from refreshing
@@ -49,7 +53,36 @@ function Payment() {
     //In order to click the 'buy button only once
     setProcessing(true);
 
-    // const payload = await stripe
+    //confirming the payment using the clientSecret(how much to charge the client)
+    const payload = await stripe
+      .confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: elements.getElement(CardElement),
+        },
+      })
+      .then(({ paymentIntent }) => {
+        //paymentItems = payment confirmation
+
+        db.collection("users")
+          .doc(user?.uid)
+          .collection("orders")
+          .doc(paymentIntent.id)
+          .set({
+            basket: basket,
+            amount: paymentIntent.amount,
+            created: paymentIntent.created,
+          });
+
+        setSucceeded(true);
+        setError(null);
+        setProcessing(false);
+
+        dispatch({
+          type: "EMPTY_BASKET",
+        });
+
+        history.replace("/orders");
+      });
   };
 
   //Listen for changes in CardElement & display the card details errors
